@@ -1,227 +1,186 @@
 ---
 /**
- * MechanicalLever.astro
- * Fixed bottom-center industrial lever with:
- *   - Dark gear-base chassis with hazard warning stripes (Cyberpunk yellow/black)
- *   - Vertical slot through which the chromatic metal shaft travels
- *   - 10px-wide chrome metallic shaft with gradient highlight
- *   - 48×48px spherical red ball knob (#FF003C) with 3D lighting via radial-gradient
+ * MechanicalLever.astro  (refactored — lever removed, switch button only)
+ * Fixed bottom-center red switch button with pulsing/blinking indicator light.
  *
  * Interaction model (design.md §5):
- *   - Click (or swipe down) on the knob/shaft → fires 'lever:pull' custom event
- *   - The lever TypeScript state machine in scripts/lever.ts handles the 3D drum rotation
- *   - Keyboard: Enter/Space on the lever element also fires the event (a11y)
+ *   - Click on the button → fires 'lever:pull' custom event (handled by lever.ts)
+ *   - Keyboard: Enter/Space on the element also fires the event (a11y)
+ *   - The blinking red light draws attention and signals the current view state
  */
 ---
 
-<!-- Fixed bottom-center lever assembly -->
+<!-- Fixed bottom-center switch button -->
 <div
   id="mechanical-lever"
-  class="lever-assembly"
+  class="switch-assembly"
   role="button"
   tabindex="0"
   aria-label="Toggle view: Executive ↔ GameDev"
   aria-pressed="false"
 >
-  <!-- Gear-base chassis with hazard stripes + vertical slot -->
-  <div class="lever-base" aria-hidden="true">
-    <!-- Hazard stripe layer -->
-    <div class="lever-hazard-stripes"></div>
-    <!-- Chrome chassis body on top -->
-    <div class="lever-chassis">
-      <!-- Vertical slot carved through the chassis -->
-      <div class="lever-slot"></div>
-    </div>
+  <!-- Pulsing indicator light -->
+  <div class="switch-light" aria-hidden="true">
+    <div class="switch-light-inner"></div>
   </div>
 
-  <!-- Shaft + knob wrapper — rotates as a unit -->
-  <div id="lever-shaft-wrapper" class="lever-shaft-wrapper" aria-hidden="true">
-    <!-- Metallic chrome shaft -->
-    <div class="lever-shaft gradient-chrome-shaft"></div>
-    <!-- Spherical red ball knob -->
-    <div class="lever-knob gradient-red-ball">
-      <!-- Specular highlight dot for extra 3D realism -->
-      <div class="lever-knob-highlight"></div>
-    </div>
+  <!-- Button body -->
+  <div class="switch-btn" aria-hidden="true">
+    <!-- Radial highlight for 3-D depth -->
+    <div class="switch-btn-highlight"></div>
   </div>
 
-  <!-- View-state label underneath the lever (switches with data-view) -->
-  <div class="lever-label" aria-live="polite">
-    <span class="lever-label-exec" data-lever-label="executive">Executive View</span>
-    <span class="lever-label-hud"  data-lever-label="gamedev">HUD Mode</span>
+  <!-- View-state label -->
+  <div class="switch-label" aria-live="polite">
+    <span data-lever-label="executive">Executive View</span>
+    <span data-lever-label="gamedev">HUD Mode</span>
   </div>
 </div>
 
+
 <style>
   /* ----------------------------------------------------------------
-     Lever Assembly — fixed bottom-center (z-50)
+     Switch Assembly — fixed bottom-center (z-50)
      ---------------------------------------------------------------- */
-  .lever-assembly {
+  .switch-assembly {
     position: fixed;
-    bottom: 1rem;
+    bottom: 1.5rem;
     left: 50%;
     translate: -50% 0;
     z-index: 50;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0;
+    gap: 0.45rem;
     cursor: pointer;
     user-select: none;
-    /* Outer glow reacts to the active view */
-    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.3));
-    transition: filter 600ms ease;
   }
 
-  /* When GameDev is active, swap cyan glow for red */
-  :global(body[data-view="gamedev"]) .lever-assembly {
-    filter: drop-shadow(0 0 12px rgba(255, 0, 60, 0.5));
-  }
-
-  .lever-assembly:focus-visible {
-    outline: 2px solid var(--cp-cyan);
-    outline-offset: 6px;
-    border-radius: 6px;
+  .switch-assembly:focus-visible {
+    outline: 2px solid var(--cp-cyan, #00f0ff);
+    outline-offset: 8px;
+    border-radius: 50%;
   }
 
   /* ----------------------------------------------------------------
-     Gear-base chassis
+     Indicator light (blinking ring above the button)
      ---------------------------------------------------------------- */
-  .lever-base {
-    position: relative;
-    width: 72px;
-    height: 28px;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid #2d3150;
-    box-shadow:
-      0 2px 8px rgba(0,0,0,0.7),
-      inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-
-  /* Hazard-stripe background (yellow + obsidian at -45°) */
-  .lever-hazard-stripes {
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      -45deg,
-      #fcee09,
-      #fcee09 5px,
-      #07080c 5px,
-      #07080c 10px
-    );
-    opacity: 0.85;
-  }
-
-  /* Dark chassis panel on top of the stripes */
-  .lever-chassis {
-    position: absolute;
-    inset: 4px 8px;
-    background-color: #11131c;
-    border-radius: 2px;
+  .switch-light {
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: rgba(255, 0, 48, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: pulse-ring 1.6s ease-in-out infinite;
   }
 
-  /* Vertical slot — the shaft passes through here */
-  .lever-slot {
-    width: 12px;
-    height: 100%;
-    background: #07080c;
-    border-radius: 2px;
-    box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
-  }
-
-  /* ----------------------------------------------------------------
-     Shaft + knob wrapper — rotates on interaction
-     ---------------------------------------------------------------- */
-  .lever-shaft-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* Pivot at the bottom of the chassis (origin = top of wrapper = chassis center) */
-    transform-origin: top center;
-    transform: rotateZ(0deg);
-    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-    /* The shaft starts from above the chassis; we overlap by using negative margin */
-    margin-top: -10px;
-    position: relative;
-    z-index: 10;
-  }
-
-  /* Tilt when GameDev is active — lever pulled toward viewer (backward = +8deg) */
-  :global(body[data-view="gamedev"]) .lever-shaft-wrapper {
-    transform: rotateZ(8deg);
-  }
-
-  /* GPU acceleration hint */
-  .lever-shaft-wrapper,
-  .lever-shaft,
-  .lever-knob {
-    will-change: transform;
-  }
-
-  /* Chrome metallic shaft — 10 × 52px */
-  .lever-shaft {
-    width: 10px;
-    height: 52px;
-    border-radius: 5px;
-  }
-
-  /* Spherical 48×48 red ball knob */
-  .lever-knob {
-    width: 48px;
-    height: 48px;
+  .switch-light-inner {
+    width: 8px;
+    height: 8px;
     border-radius: 9999px;
-    position: relative;
-    /* Hover: lift + intensify red glow */
-    transition:
-      transform 200ms ease,
-      box-shadow 200ms ease;
-  }
-
-  .lever-assembly:hover .lever-knob,
-  .lever-assembly:focus-visible .lever-knob {
-    transform: scale(1.08);
+    background: #ff0030;
     box-shadow:
-      0 0 35px rgba(255, 0, 60, 0.9),
-      0 10px 20px rgba(0, 0, 0, 0.85),
-      inset -4px -4px 8px rgba(0, 0, 0, 0.7),
-      inset 3px 3px 6px rgba(255, 255, 255, 0.6);
+      0 0 6px 2px rgba(255, 0, 48, 0.9),
+      0 0 12px 4px rgba(255, 0, 48, 0.5);
+    animation: blink-dot 1.6s ease-in-out infinite;
   }
 
-  /* Specular highlight — small white dot at upper-left for 3D sphere illusion */
-  .lever-knob-highlight {
-    position: absolute;
-    top: 22%;
-    left: 22%;
-    width: 28%;
-    height: 28%;
-    border-radius: 9999px;
-    background: radial-gradient(circle, rgba(255,255,255,0.75) 0%, transparent 80%);
-    pointer-events: none;
+  /* When GameDev is active → switch to cyan light */
+  :global(body[data-view="gamedev"]) .switch-light {
+    background: rgba(0, 240, 255, 0.15);
+    animation: pulse-ring-cyan 1.6s ease-in-out infinite;
+  }
+  :global(body[data-view="gamedev"]) .switch-light-inner {
+    background: #00f0ff;
+    box-shadow:
+      0 0 6px 2px rgba(0, 240, 255, 0.9),
+      0 0 12px 4px rgba(0, 240, 255, 0.5);
+    animation: blink-dot-cyan 1.6s ease-in-out infinite;
   }
 
   /* ----------------------------------------------------------------
-     State label below the lever
+     Switch button body — large red circular button
      ---------------------------------------------------------------- */
-  .lever-label {
-    margin-top: 6px;
-    font-family: var(--font-jetbrains);
-    font-size: 0.6rem;
+  .switch-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 9999px;
+    position: relative;
+    /* Deep red radial gradient for 3-D dome look */
+    background: radial-gradient(
+      circle at 35% 30%,
+      #ff4466 0%,
+      #cc0022 45%,
+      #880011 100%
+    );
+    box-shadow:
+      0 0 18px 6px rgba(255, 0, 48, 0.55),
+      0 6px 18px rgba(0, 0, 0, 0.75),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+      inset 0 4px 8px rgba(255, 120, 120, 0.25);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+    will-change: transform, box-shadow;
+  }
+
+  /* Hover: lift + stronger glow */
+  .switch-assembly:hover .switch-btn,
+  .switch-assembly:focus-visible .switch-btn {
+    transform: scale(1.07) translateY(-2px);
+    box-shadow:
+      0 0 30px 10px rgba(255, 0, 48, 0.75),
+      0 8px 24px rgba(0, 0, 0, 0.85),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+      inset 0 4px 10px rgba(255, 140, 140, 0.35);
+  }
+
+  /* Active/pressed: push down */
+  .switch-assembly:active .switch-btn {
+    transform: scale(0.96) translateY(2px);
+    box-shadow:
+      0 0 12px 4px rgba(255, 0, 48, 0.5),
+      0 2px 8px rgba(0, 0, 0, 0.8),
+      inset 0 4px 10px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Specular highlight — white arc for 3-D dome illusion */
+  .switch-btn-highlight {
+    position: absolute;
+    top: 14%;
+    left: 18%;
+    width: 40%;
+    height: 30%;
+    border-radius: 9999px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.55) 0%,
+      transparent 75%
+    );
+    pointer-events: none;
+    transform: rotate(-20deg);
+  }
+
+  /* ----------------------------------------------------------------
+     View-state label below the button
+     ---------------------------------------------------------------- */
+  .switch-label {
+    font-family: var(--font-jetbrains, monospace);
+    font-size: 0.58rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     text-align: center;
-    color: var(--cp-cyan);
-    opacity: 0.7;
+    color: var(--cp-cyan, #00f0ff);
+    opacity: 0.75;
     height: 14px;
     overflow: hidden;
   }
 
   [data-lever-label="gamedev"] {
     display: none;
-    color: var(--cp-red);
+    color: var(--cp-red, #ff003c);
   }
 
   :global(body[data-view="gamedev"]) [data-lever-label="executive"] {
@@ -233,14 +192,46 @@
   }
 
   /* ----------------------------------------------------------------
-     Prefers-reduced-motion: skip the shaft tilt animation only
+     Keyframe animations
+     ---------------------------------------------------------------- */
+
+  /* Red outer ring pulse */
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 48, 0.5); opacity: 1; }
+    50%       { box-shadow: 0 0 0 6px rgba(255, 0, 48, 0); opacity: 0.6; }
+  }
+
+  /* Red inner dot blink */
+  @keyframes blink-dot {
+    0%, 100% { opacity: 1;   box-shadow: 0 0 6px 2px rgba(255,0,48,0.9), 0 0 14px 5px rgba(255,0,48,0.5); }
+    45%      { opacity: 0.15; box-shadow: none; }
+    55%      { opacity: 0.15; box-shadow: none; }
+  }
+
+  /* Cyan outer ring pulse (GameDev active) */
+  @keyframes pulse-ring-cyan {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.5); opacity: 1; }
+    50%       { box-shadow: 0 0 0 6px rgba(0, 240, 255, 0); opacity: 0.6; }
+  }
+
+  /* Cyan inner dot blink (GameDev active) */
+  @keyframes blink-dot-cyan {
+    0%, 100% { opacity: 1;   box-shadow: 0 0 6px 2px rgba(0,240,255,0.9), 0 0 14px 5px rgba(0,240,255,0.5); }
+    45%      { opacity: 0.15; box-shadow: none; }
+    55%      { opacity: 0.15; box-shadow: none; }
+  }
+
+  /* ----------------------------------------------------------------
+     Prefers-reduced-motion: disable all animations
      ---------------------------------------------------------------- */
   @media (prefers-reduced-motion: reduce) {
-    .lever-shaft-wrapper {
-      transition: none;
+    .switch-light,
+    .switch-light-inner {
+      animation: none;
     }
-    .lever-assembly {
+    .switch-assembly {
       transition: none;
     }
   }
 </style>
+
