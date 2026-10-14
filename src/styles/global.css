@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Cyberpunk 2077 Palette Tokens */
+  --bg-obsidian: #07080c;
+  --bg-obsidian-dark: #030406;
+  --bg-panel: #11131c;
+  --bg-panel-light: #171a26;
+  --border-panel: #1f2438;
+  
+  --cp-yellow: #fcee09;
+  --cp-cyan: #00f0ff;
+  --cp-red: #ff003c;
+  --cp-red-deep: #590015;
+  --cp-red-light: #ff7597;
+
+  /* Typography */
+  --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-rajdhani: 'Rajdhani', sans-serif;
+  --font-jetbrains: 'JetBrains Mono', monospace;
+
+  /* 3D Cylinder Physics */
+  --drum-duration: 900ms;
+  --drum-timing: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Base Styles */
+html {
+  background-color: var(--bg-obsidian);
+  color: #f3f4f6;
+  font-family: var(--font-inter);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--bg-obsidian);
+  overflow-x: hidden;
+}
+
+/* Custom Selection */
+::selection {
+  background-color: var(--cp-yellow);
+  color: #07080c;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #07080c;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2438;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cp-cyan);
+}
+
+/* ==========================================================================
+   3D Roulette Drum Architecture & Stage (#viewport-stage & #roulette-drum)
+   ========================================================================== */
+
+#viewport-stage {
+  perspective: 1600px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  overflow: visible;
+}
+
+#roulette-drum {
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Face containers within the drum */
+.drum-face {
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: transform var(--drum-duration) var(--drum-timing),
+              opacity var(--drum-duration) var(--drum-timing);
+}
+
+/*
+  Face A: Executive View (Default / Resting state)
+  Positioned straight ahead, rotating upward when deactivated
+*/
+#executive-face {
+  transform-origin: center center;
+  transform: translate3d(0, 0, 0) rotateX(0deg);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/*
+  Face B: GameDev Cyberpunk 2077 HUD View
+  Resting below on X axis (-90deg), emerges from the bottom when activated
+*/
+#gamedev-face {
+  transform-origin: center top;
+  transform: translate3d(0, 100%, 0) rotateX(-90deg);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Active State: GameDev View Engaged */
+body[data-view="gamedev"] #executive-face {
+  transform: translate3d(0, -100%, 0) rotateX(90deg);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+body[data-view="gamedev"] #gamedev-face {
+  position: relative;
+  transform: translate3d(0, 0, 0) rotateX(0deg);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* State Transitioning Lock: locks pointer interaction while rotating */
+body.is-rotating {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* Prefers Reduced Motion: graceful 350ms crossfade without vertigo rotation */
+@media (prefers-reduced-motion: reduce) {
+  #viewport-stage {
+    perspective: none !important;
+  }
+  .drum-face {
+    transition: opacity 350ms ease-in-out !important;
+    transform: none !important;
+  }
+  #executive-face {
+    transform: none !important;
+  }
+  #gamedev-face {
+    transform: none !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  body[data-view="gamedev"] #executive-face {
+    position: absolute;
+    opacity: 0;
+    transform: none !important;
+  }
+  body[data-view="gamedev"] #gamedev-face {
+    position: relative;
+    opacity: 1;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Cyberpunk 2077 Chamfered Clip-Path Utilities (Bordado Biselado a 45°)
+   ========================================================================== */
+
+.clip-chamfer-br {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+
+.clip-chamfer-tl-br {
+  clip-path: polygon(
+    16px 0,
+    100% 0,
+    100% calc(100% - 16px),
+    calc(100% - 16px) 100%,
+    0 100%,
+    0 16px
+  );
+}
+
+.clip-chamfer-tr-bl {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+}
+
+.clip-chamfer-all {
+  clip-path: polygon(
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px),
+    0 12px
+  );
+}
+
+.clip-badge {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.clip-tag-sm {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+}
+
+/* ==========================================================================
+   Metallic & Industrial Gradients (Mechanical Lever & Hazard Accents)
+   ========================================================================== */
+
+/* Lever Chrome Shaft */
+.gradient-chrome-shaft {
+  background: linear-gradient(
+    90deg,
+    #1f2937 0%,
+    #4b5563 18%,
+    #9ca3af 42%,
+    #f3f4f6 50%,
+    #9ca3af 58%,
+    #4b5563 82%,
+    #111827 100%
+  );
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4),
+              0 4px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Spherical Red Ball Knob with 3D Lighting */
+.gradient-red-ball {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ff7597 0%,
+    #ff003c 45%,
+    #8f0022 80%,
+    #3b000e 100%
+  );
+  box-shadow: 0 0 25px rgba(255, 0, 60, 0.65),
+              0 8px 16px rgba(0, 0, 0, 0.8),
+              inset -4px -4px 8px rgba(0, 0, 0, 0.7),
+              inset 3px 3px 6px rgba(255, 255, 255, 0.6);
+}
+
+/* Lever Base Chassis Hazard Stripes */
+.pattern-hazard-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #fcee09,
+    #fcee09 8px,
+    #07080c 8px,
+    #07080c 16px
+  );
+}
+
+/* Cyberpunk Grid Background */
+.bg-cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(31, 36, 56, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(31, 36, 56, 0.3) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Scanline Overlay for Cyberpunk HUD */
+.cyber-scanlines {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 4px 100%;
+  pointer-events: none;
+}

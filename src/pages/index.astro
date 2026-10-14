@@ -1,0 +1,26 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import '../styles/global.css';
+---
+
+<MainLayout>
+  <main class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+    <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded border border-panel-border bg-panel text-xs text-cp-cyan font-mono clip-tag-sm">
+      <span class="w-2 h-2 rounded-full bg-cp-cyan animate-pulse"></span>
+      CORE INITIALIZED // PHASE 1
+    </div>
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
+      Juan José <span class="text-cp-yellow">Ardila Arévalo</span>
+    </h1>
+    <p class="text-gray-400 font-cyber text-lg tracking-wider uppercase mb-8">
+      Software Engineer & Game Systems Developer
+    </p>
+    <div class="p-6 rounded-lg bg-panel border border-panel-border max-w-md w-full shadow-lg">
+      <div class="text-sm font-mono text-gray-300">
+        <span class="text-cp-red font-bold">CYBERPUNK ENGINE:</span> ONLINE<br />
+        <span class="text-cp-cyan font-bold">TAILWIND 3.4+:</span> ACTIVE<br />
+        <span class="text-cp-yellow font-bold">STRICT TS:</span> ENFORCED
+      </div>
+    </div>
+  </main>
+</MainLayout>

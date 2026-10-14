@@ -1,0 +1,2 @@
+Lee y obedece estrictamente todas las reglas de arquitectura, stack y contexto definidas en `@AGENTS.md`.
+Para cualquier implementación o cambio de código, sigue secuencialmente la especificación activa en `@specs/portfolio-core/design.md` y `@specs/portfolio-core/tasks.md`.

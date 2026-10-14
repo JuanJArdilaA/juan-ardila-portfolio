@@ -1,0 +1,121 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: 'en' | 'es';
+  ogImage?: string;
+}
+
+const {
+  title = "Juan José Ardila Arévalo | Software Engineer & Game Systems",
+  description = "High-performance software engineering portfolio of Juan José Ardila Arévalo. Junior Full Stack & Systems Developer specializing in Python, C++, and scalable architectures.",
+  locale = "en",
+  ogImage = "/og-preview.png",
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://juanjardilaa.github.io");
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Juan José Ardila Arévalo",
+  "alternateName": "Juan Jose Ardila",
+  "jobTitle": "Full Stack Software Developer",
+  "description": "Junior Full Stack & Systems Developer with focus on scalable software architectures, algorithms, Python, and C++.",
+  "url": canonicalURL.origin,
+  "sameAs": [
+    "https://github.com/JuanJArdilaA",
+    "https://linkedin.com/in/juanjardilaa"
+  ],
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Bucaramanga",
+    "addressRegion": "Santander",
+    "addressCountry": "Colombia"
+  },
+  "knowsLanguage": ["en", "es"],
+  "knowsAbout": [
+    "Software Engineering",
+    "Python",
+    "C++",
+    "JavaScript",
+    "TypeScript",
+    "HTML/CSS",
+    "Linux",
+    "Git",
+    "GitHub",
+    "Scrum",
+    "SDD/KDD",
+    "Astro"
+  ]
+};
+---
+
+<!doctype html>
+<html lang={locale} class="dark" data-lang={locale}>
+  <head>
+    <!-- Charset & Viewport -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#07080C" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <meta name="author" content="Juan José Ardila Arévalo" />
+    <meta
+      name="keywords"
+      content="Juan José Ardila Arévalo, Software Developer, Full Stack, Python, C++, JavaScript, TypeScript, Linux, Astro, Portfolio, Bucaramanga"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={locale === "es" ? "es_CO" : "en_US"} />
+    <meta property="og:site_name" content="Juan José Ardila Arévalo Portfolio" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImage} />
+
+    <!-- Google Fonts Preconnect & Stylesheets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+
+    <!-- Instant Language Initialization (Zero Flash) -->
+    <script is:inline>
+      (function () {
+        try {
+          const storedLang = localStorage.getItem('portfolio_lang') || 'en';
+          document.documentElement.lang = storedLang;
+          document.documentElement.setAttribute('data-lang', storedLang);
+        } catch (e) {
+          document.documentElement.lang = 'en';
+          document.documentElement.setAttribute('data-lang', 'en');
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-obsidian text-gray-100 font-sans antialiased min-h-screen selection:bg-cp-yellow selection:text-obsidian">
+    <slot />
+  </body>
+</html>
