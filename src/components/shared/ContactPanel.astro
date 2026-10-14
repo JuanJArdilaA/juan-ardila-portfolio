@@ -1,0 +1,95 @@
+---
+import { Copy, MessageCircle } from '@lucide/astro';
+import BrandIcon from './BrandIcon.astro';
+import { profile } from '../../data/portfolioData';
+import { t } from '../../scripts/i18n';
+
+/** One contact module, styled per face (RF-07). */
+interface Props {
+  variant: 'executive' | 'gamedev';
+}
+
+const { variant } = Astro.props;
+const isHud = variant === 'gamedev';
+---
+
+<section
+  id={`${variant}-contact`}
+  class={`contact-panel contact-panel--${variant} scroll-mt-24`}
+  aria-labelledby={`${variant}-contact-title`}
+>
+  <div class="contact-panel__intro">
+    <p class={isHud ? 'hud-eyebrow' : 'section-eyebrow'} data-i18n-key={isHud ? 'hud.comms' : 'section.contact.eyebrow'}>
+      {t(isHud ? 'hud.comms' : 'section.contact.eyebrow')}
+    </p>
+    {
+      isHud ? (
+        <h2 id={`${variant}-contact-title`} class="hud-section-title" data-i18n-key="section.contact">
+          {t('section.contact')}
+        </h2>
+      ) : (
+        <h2 id={`${variant}-contact-title`} class="section-title" data-i18n-key="section.contact">
+          {t('section.contact')}
+        </h2>
+      )
+    }
+    <p class="contact-panel__sub" data-i18n-key="section.contact.sub">{t('section.contact.sub')}</p>
+  </div>
+
+  <ul class="contact-panel__actions">
+    <li>
+      <button type="button" class="contact-action" data-action="copy-email" id={`${variant}-copy-email`}>
+        <Copy size={20} />
+        <span class="contact-action__text">
+          <span class="contact-action__label" data-i18n-key="contact.email">{t('contact.email')}</span>
+          <span class="contact-action__value">{profile.email}</span>
+        </span>
+      </button>
+    </li>
+    <li>
+      <a
+        class="contact-action"
+        id={`${variant}-whatsapp`}
+        href={profile.whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <MessageCircle size={20} />
+        <span class="contact-action__text">
+          <span class="contact-action__label" data-i18n-key="contact.whatsapp">{t('contact.whatsapp')}</span>
+          <span class="contact-action__value">{profile.phone}</span>
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        class="contact-action"
+        id={`${variant}-github`}
+        href={profile.githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <BrandIcon name="github" size={20} />
+        <span class="contact-action__text">
+          <span class="contact-action__label" data-i18n-key="contact.github">{t('contact.github')}</span>
+          <span class="contact-action__value">@{profile.githubUser}</span>
+        </span>
+      </a>
+    </li>
+    <li>
+      <a
+        class="contact-action"
+        id={`${variant}-linkedin`}
+        href={profile.linkedinUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <BrandIcon name="linkedin" size={20} />
+        <span class="contact-action__text">
+          <span class="contact-action__label" data-i18n-key="contact.linkedin">{t('contact.linkedin')}</span>
+          <span class="contact-action__value">{profile.fullName}</span>
+        </span>
+      </a>
+    </li>
+  </ul>
+</section>

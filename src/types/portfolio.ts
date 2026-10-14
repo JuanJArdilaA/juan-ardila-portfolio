@@ -62,9 +62,21 @@ export interface GitHubStats {
   htmlUrl: string;
 }
 
-/** Project after merging the local manifest with (optional) live stats. */
+/**
+ * Project after merging the local manifest with (optional) live stats.
+ * `origin` tells whether the card comes from the manual manifest or was
+ * auto-discovered from the GitHub API.
+ */
 export interface MergedProject extends ProjectItem {
   stats?: GitHubStats;
+  origin: 'manifest' | 'github';
+}
+
+/** Technology filter pill (RF-06). `match` holds lowercase technology names. */
+export interface ProjectFilter {
+  id: string;
+  label: Record<Locale, string>;
+  match: string[];
 }
 
 /** Where the project data came from (drives the "Cached Telemetry Mode" badge). */
@@ -97,10 +109,12 @@ export interface ProfileData {
   coordinates: string;
   email: string;
   phone: string;
+  whatsappUrl: string;
+  cvUrl: string;
   githubUrl: string;
   linkedinUrl: string;
   githubUser: string;
 }
 
-/** Flat translation dictionary keyed by `data-i18n-key`. */
-export type Dictionary = Record<Locale, Record<string, string>>;
+/** Flat translation dictionary keyed by `data-i18n-key` (keys checked per locale). */
+export type Dictionary<K extends string = string> = Record<Locale, Record<K, string>>;

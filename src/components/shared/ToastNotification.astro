@@ -1,0 +1,9 @@
+---
+import { t } from '../../scripts/i18n';
+---
+
+<!-- Floating feedback toast (RF-07). Text is swapped by showToast() in ui.ts. -->
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+  <span class="toast-dot" aria-hidden="true"></span>
+  <span id="toast-message" data-i18n-key="toast.email">{t('toast.email')}</span>
+</div>

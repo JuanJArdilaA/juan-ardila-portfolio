@@ -1,4 +1,8 @@
 ---
+import '../styles/global.css';
+import '../styles/components.css';
+import { GITHUB_URL, LINKEDIN_URL, dictionary, profile } from '../data/portfolioData';
+
 interface Props {
   title?: string;
   description?: string;
@@ -7,47 +11,43 @@ interface Props {
 }
 
 const {
-  title = "Juan José Ardila Arévalo | Software Engineer & Game Systems",
-  description = "High-performance software engineering portfolio of Juan José Ardila Arévalo. Junior Full Stack & Systems Developer specializing in Python, C++, and scalable architectures.",
-  locale = "en",
-  ogImage = "/og-preview.png",
+  title = dictionary.en['meta.title'],
+  description = dictionary.en['meta.description'],
+  locale = 'en',
+  ogImage = '/og-preview.png',
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? "https://juanjardilaa.github.io");
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://juanjardilaa.github.io');
 
+// Schema.org Person (RNF-06): name, role, location and social profiles.
 const personSchema = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Juan José Ardila Arévalo",
-  "alternateName": "Juan Jose Ardila",
-  "jobTitle": "Full Stack Software Developer",
-  "description": "Junior Full Stack & Systems Developer with focus on scalable software architectures, algorithms, Python, and C++.",
-  "url": canonicalURL.origin,
-  "sameAs": [
-    "https://github.com/JuanJArdilaA",
-    "https://linkedin.com/in/juanjardilaa"
-  ],
-  "address": {
-    "@type": "PostalAddress",
-    "addressLocality": "Bucaramanga",
-    "addressRegion": "Santander",
-    "addressCountry": "Colombia"
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.fullName,
+  jobTitle: profile.role.en,
+  description,
+  url: canonicalURL.origin,
+  sameAs: [GITHUB_URL, LINKEDIN_URL],
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Bucaramanga',
+    addressCountry: 'Colombia',
   },
-  "knowsLanguage": ["en", "es"],
-  "knowsAbout": [
-    "Software Engineering",
-    "Python",
-    "C++",
-    "JavaScript",
-    "TypeScript",
-    "HTML/CSS",
-    "Linux",
-    "Git",
-    "GitHub",
-    "Scrum",
-    "SDD/KDD",
-    "Astro"
-  ]
+  knowsLanguage: ['en', 'es'],
+  knowsAbout: [
+    'Software Engineering',
+    'Python',
+    'C++',
+    'JavaScript',
+    'TypeScript',
+    'HTML/CSS',
+    'Linux',
+    'Git',
+    'GitHub',
+    'Scrum',
+    'SDD/KDD',
+    'Astro',
+  ],
 };
 ---
 
@@ -115,7 +115,7 @@ const personSchema = {
       })();
     </script>
   </head>
-  <body class="bg-obsidian text-gray-100 font-sans antialiased min-h-screen selection:bg-cp-yellow selection:text-obsidian">
+  <body data-view="executive" class="bg-obsidian text-gray-100 font-sans antialiased min-h-screen selection:bg-cp-yellow selection:text-obsidian">
     <slot />
   </body>
 </html>

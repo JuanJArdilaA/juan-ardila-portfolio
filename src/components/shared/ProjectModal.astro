@@ -1,0 +1,67 @@
+---
+import { ArrowUpRight, X } from '@lucide/astro';
+import BrandIcon from './BrandIcon.astro';
+import { t } from '../../scripts/i18n';
+---
+
+<!--
+  Case-study modal (RF-06). Native <dialog>: focus trap, Esc to close and
+  focus restoration come for free. Content is injected by projectsController.ts.
+-->
+<dialog id="project-modal" class="project-modal" aria-labelledby="project-modal-title">
+  <div class="project-modal__panel">
+    <header class="project-modal__header">
+      <h2 id="project-modal-title" class="project-modal__title" data-modal="title"></h2>
+      <button
+        type="button"
+        class="project-modal__close"
+        data-action="close-modal"
+        aria-label={t('modal.close')}
+        data-i18n-aria-label="modal.close"
+      >
+        <X size={20} />
+      </button>
+    </header>
+
+    <div class="project-modal__body">
+      <section>
+        <h3 class="modal-label" data-i18n-key="project.problem">{t('project.problem')}</h3>
+        <p class="modal-text" data-modal="problem"></p>
+      </section>
+
+      <section>
+        <h3 class="modal-label" data-i18n-key="project.architecture">{t('project.architecture')}</h3>
+        <p class="modal-text" data-modal="architecture"></p>
+      </section>
+
+      <section>
+        <h3 class="modal-label" data-i18n-key="project.stack">{t('project.stack')}</h3>
+        <ul class="bento-card__tags" data-modal="stack"></ul>
+      </section>
+    </div>
+
+    <footer class="project-modal__footer">
+      <a
+        class="btn btn-primary"
+        data-modal="repo"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <BrandIcon name="github" size={18} />
+        <span data-i18n-key="project.repo">{t('project.repo')}</span>
+      </a>
+      <a
+        class="btn btn-ghost"
+        data-modal="demo"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        hidden
+      >
+        <span data-i18n-key="project.demo">{t('project.demo')}</span>
+        <ArrowUpRight size={18} />
+      </a>
+    </footer>
+  </div>
+</dialog>

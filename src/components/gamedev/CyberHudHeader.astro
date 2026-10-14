@@ -1,0 +1,44 @@
+---
+import { profile } from '../../data/portfolioData';
+import { t } from '../../scripts/i18n';
+---
+
+<header id="gamedev-hero" class="hud-header" aria-labelledby="hud-name">
+  <div class="mx-auto max-w-7xl px-4 pb-14 pt-28 sm:px-6 lg:pt-36">
+    <!-- Telemetry strip -->
+    <ul class="flex flex-wrap items-center gap-2 sm:gap-3" aria-label="HUD telemetry">
+      <li class="hud-chip hud-chip--yellow" data-i18n-key="hud.terminal">{t('hud.terminal')}</li>
+      <li class="hud-chip">
+        <span class="hud-blink" aria-hidden="true"></span>
+        <span data-i18n-key="hud.link">{t('hud.link')}</span>
+      </li>
+      <li class="hud-chip">
+        <span class="text-gray-400" data-i18n-key="hud.location">{t('hud.location')}</span>
+        <span>{profile.coordinates}</span>
+      </li>
+      <li class="hud-chip">
+        <span class="text-gray-400" data-i18n-key="hud.fps">{t('hud.fps')}</span>
+        <span data-hud-fps>60</span>
+      </li>
+      <li class="hud-chip hud-chip--red">
+        <span class="text-gray-300" data-i18n-key="hud.mem">{t('hud.mem')}</span>
+        <span data-hud-mem>42.0 MB</span>
+      </li>
+    </ul>
+
+    <!-- Identity -->
+    <div class="mt-10 hud-frame">
+      <h2 id="hud-name" class="hud-title glitch" data-text={profile.fullName}>{profile.fullName}</h2>
+      <p class="hud-role">
+        <span data-l10n-en={profile.role.en} data-l10n-es={profile.role.es}>{profile.role.en}</span>
+      </p>
+      <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-300 sm:text-lg" data-i18n-key="hud.tagline">
+        {t('hud.tagline')}
+      </p>
+      <p class="hud-focus">
+        <span class="hud-focus__label" data-i18n-key="hud.focus">{t('hud.focus')}</span>
+        <span data-i18n-key="hud.focusValue">{t('hud.focusValue')}</span>
+      </p>
+    </div>
+  </div>
+</header>

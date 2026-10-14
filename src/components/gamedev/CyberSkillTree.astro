@@ -1,0 +1,41 @@
+---
+import { skillGroups } from '../../data/portfolioData';
+import { t } from '../../scripts/i18n';
+---
+
+<section id="gamedev-skills" class="hud-section scroll-mt-24" aria-labelledby="skilltree-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6">
+    <p class="hud-eyebrow">// 02</p>
+    <h2 id="skilltree-title" class="hud-section-title" data-i18n-key="hud.skilltree">{t('hud.skilltree')}</h2>
+    <p class="mt-3 text-gray-400" data-i18n-key="hud.skilltree.sub">{t('hud.skilltree.sub')}</p>
+
+    <div class="skill-tree">
+      <div class="skill-root" data-i18n-key="hud.root">{t('hud.root')}</div>
+
+      <div class="skill-branches">
+        {
+          skillGroups.map((group) => (
+            <section class="skill-branch" id={`hud-skills-${group.id}`}>
+              <header class="skill-branch__header">
+                <h3 class="skill-branch__title" data-l10n-en={group.title.en} data-l10n-es={group.title.es}>
+                  {group.title.en}
+                </h3>
+                <span class="skill-branch__tag" data-i18n-key="hud.unlocked">{t('hud.unlocked')}</span>
+              </header>
+              <ul class="skill-nodes">
+                {group.items.map((skill) => (
+                  <li class="skill-node">
+                    <span class="skill-node__dot" aria-hidden="true" />
+                    <span data-l10n-en={skill.label.en} data-l10n-es={skill.label.es}>
+                      {skill.label.en}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

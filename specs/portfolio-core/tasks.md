@@ -9,9 +9,9 @@
 - [x] Task 2.2: Create src/services/githubService.ts to fetch public repos from https://api.github.com/users/JuanJArdilaA/repos?sort=updated&per_page=15 with 30-min localStorage cache and fallback to portfolioData.ts.
 
 ## Phase 3: Shared UI & Dual Views (Executive + GameDev)
-- [ ] Task 3.1: Create src/components/shared/Navbar.astro (with reactive EN/ES switch and email copy button), ToastNotification.astro, and ProjectModal.astro.
-- [ ] Task 3.2: Create src/components/executive/ExecutiveView.astro and subcomponents (ExecutiveHero, BentoProjects with stack filter, EducationAndSkills).
-- [ ] Task 3.3: Create src/components/gamedev/GameDevView.astro and subcomponents (CyberHudHeader, CyberQuestProjects, CyberSkillTree).
+- [x] Task 3.1: Create src/components/shared/Navbar.astro (with reactive EN/ES switch and email copy button), ToastNotification.astro, and ProjectModal.astro.
+- [x] Task 3.2: Create src/components/executive/ExecutiveView.astro and subcomponents (ExecutiveHero, BentoProjects with stack filter, EducationAndSkills).
+- [x] Task 3.3: Create src/components/gamedev/GameDevView.astro and subcomponents (CyberHudHeader, CyberQuestProjects, CyberSkillTree).
 
 ## Phase 4: Mechanical Lever & 3D Roulette Drum Integration
 - [ ] Task 4.1: Build src/components/shared/MechanicalLever.astro (metallic shaft + red ball knob) and assemble the 3D rotating drum in src/pages/index.astro so pulling down rotates to GameDev View from bottom, and pulling back rotates in reverse to Executive View.

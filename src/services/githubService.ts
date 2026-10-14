@@ -1,14 +1,20 @@
-import { profile, projects as localProjects } from '../data/portfolioData';
+import {
+  EXCLUDED_REPOS,
+  GITHUB_USER,
+  dictionary,
+  projects as localProjects,
+} from '../data/portfolioData';
 import type {
   GitHubRepoResponse,
   MergedProject,
+  ProjectItem,
   ProjectsResult,
 } from '../types/portfolio';
 
 /** Cache key and TTL (RF-05). */
-const CACHE_KEY = `gh_repos_${profile.githubUser}`;
+const CACHE_KEY = `gh_repos_${GITHUB_USER}`;
 const CACHE_TTL_MS = 30 * 60 * 1000;
-const API_URL = `https://api.github.com/users/${profile.githubUser}/repos?sort=updated&per_page=15`;
+const API_URL = `https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=15`;
 
 interface CacheEntry {
   timestamp: number;
@@ -32,11 +38,10 @@ function isRepo(value: unknown): value is GitHubRepoResponse {
   );
 }
 
-/** Validates a whole payload; returns null if it is not an array of repos. */
+/** Validates a whole payload; returns null if it is not an array. */
 function parseRepos(payload: unknown): GitHubRepoResponse[] | null {
   if (!Array.isArray(payload)) return null;
-  const repos = payload.filter(isRepo);
-  return repos;
+  return payload.filter(isRepo);
 }
 
 /** Reads a non-expired cache entry, or null if missing/expired/corrupt. */
@@ -63,29 +68,74 @@ function writeCache(repos: GitHubRepoResponse[]): void {
   }
 }
 
+/** Builds a card definition for a repo that is NOT in the local manifest. */
+function repoToProjectItem(repo: GitHubRepoResponse): ProjectItem {
+  const technologies: string[] = [];
+  if (repo.language) technologies.push(repo.language);
+  for (const topic of repo.topics) {
+    if (typeof topic === 'string' && !technologies.includes(topic)) technologies.push(topic);
+  }
+
+  return {
+    id: `gh-${repo.id}`,
+    repoName: repo.name,
+    title: { en: repo.name, es: repo.name },
+    // GitHub descriptions are not translatable; fall back to a bilingual notice.
+    shortDescription: {
+      en: repo.description ?? dictionary.en['project.noDescription'],
+      es: repo.description ?? dictionary.es['project.noDescription'],
+    },
+    architectureSummary: {
+      en: dictionary.en['project.autoArchitecture'],
+      es: dictionary.es['project.autoArchitecture'],
+    },
+    category: 'both',
+    technologies,
+    featured: false,
+  };
+}
+
+/** Copies the live stats of a repo into the shape consumed by the UI. */
+function toStats(repo: GitHubRepoResponse): NonNullable<MergedProject['stats']> {
+  return {
+    stars: repo.stargazers_count,
+    language: repo.language,
+    updatedAt: repo.updated_at,
+    htmlUrl: repo.html_url,
+  };
+}
+
 /**
- * Merges live stats with the rich local manifest.
- * Forks are dropped unless explicitly listed in the manifest (RF-05).
- * Manifest projects without a live repo keep their local data.
+ * Merges the local manifest with the live API payload.
+ *  1. Manifest projects come first and get live stats when the repo exists.
+ *  2. Every OTHER public repo (non-fork, not excluded) is appended
+ *     automatically using its GitHub name, description and language.
+ * Forks are only kept when explicitly listed in the manifest (RF-05).
  */
 function mergeProjects(repos: GitHubRepoResponse[]): MergedProject[] {
-  const byName = new Map<string, GitHubRepoResponse>(
-    repos.filter((r) => !r.fork || localProjects.some((p) => p.repoName === r.name)).map((r) => [r.name, r]),
-  );
+  const manifestNames = new Set(localProjects.map((p) => p.repoName.toLowerCase()));
+  const byName = new Map<string, GitHubRepoResponse>(repos.map((r) => [r.name.toLowerCase(), r]));
 
-  return localProjects.map((project) => {
-    const repo = byName.get(project.repoName);
-    if (!repo) return { ...project };
-    return {
-      ...project,
-      stats: {
-        stars: repo.stargazers_count,
-        language: repo.language,
-        updatedAt: repo.updated_at,
-        htmlUrl: repo.html_url,
-      },
-    };
+  const curated: MergedProject[] = localProjects.map((project) => {
+    const repo = byName.get(project.repoName.toLowerCase());
+    return repo
+      ? { ...project, origin: 'manifest', stats: toStats(repo) }
+      : { ...project, origin: 'manifest' };
   });
+
+  const discovered: MergedProject[] = repos
+    .filter((repo) => {
+      const name = repo.name.toLowerCase();
+      return !manifestNames.has(name) && !repo.fork && !EXCLUDED_REPOS.includes(name);
+    })
+    .map((repo) => ({ ...repoToProjectItem(repo), origin: 'github', stats: toStats(repo) }));
+
+  return [...curated, ...discovered];
+}
+
+/** Offline dataset: manifest only. */
+function fallbackProjects(): MergedProject[] {
+  return localProjects.map((p) => ({ ...p, origin: 'manifest' }));
 }
 
 /**
@@ -112,6 +162,11 @@ export async function fetchProjects(): Promise<ProjectsResult> {
     return { projects: mergeProjects(repos), source: 'live' };
   } catch {
     // Silent fallback: the UI shows the "Cached Telemetry Mode" badge.
-    return { projects: localProjects.map((p) => ({ ...p })), source: 'fallback' };
+    return { projects: fallbackProjects(), source: 'fallback' };
   }
+}
+
+/** Synchronous first-paint dataset (manifest only), also used for SSR. */
+export function getManifestProjects(): MergedProject[] {
+  return fallbackProjects();
 }

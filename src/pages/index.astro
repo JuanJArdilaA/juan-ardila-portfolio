@@ -1,26 +1,37 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
-import '../styles/global.css';
+import Navbar from '../components/shared/Navbar.astro';
+import ToastNotification from '../components/shared/ToastNotification.astro';
+import ProjectModal from '../components/shared/ProjectModal.astro';
+import ExecutiveView from '../components/executive/ExecutiveView.astro';
+import GameDevView from '../components/gamedev/GameDevView.astro';
+import { t } from '../scripts/i18n';
 ---
 
 <MainLayout>
-  <main class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
-    <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded border border-panel-border bg-panel text-xs text-cp-cyan font-mono clip-tag-sm">
-      <span class="w-2 h-2 rounded-full bg-cp-cyan animate-pulse"></span>
-      CORE INITIALIZED // PHASE 1
-    </div>
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
-      Juan José <span class="text-cp-yellow">Ardila Arévalo</span>
-    </h1>
-    <p class="text-gray-400 font-cyber text-lg tracking-wider uppercase mb-8">
-      Software Engineer & Game Systems Developer
-    </p>
-    <div class="p-6 rounded-lg bg-panel border border-panel-border max-w-md w-full shadow-lg">
-      <div class="text-sm font-mono text-gray-300">
-        <span class="text-cp-red font-bold">CYBERPUNK ENGINE:</span> ONLINE<br />
-        <span class="text-cp-cyan font-bold">TAILWIND 3.4+:</span> ACTIVE<br />
-        <span class="text-cp-yellow font-bold">STRICT TS:</span> ENFORCED
+  <a href="#main-content" class="skip-link" data-i18n-key="a11y.skip">{t('a11y.skip')}</a>
+
+  <Navbar />
+
+  <main id="main-content">
+    <!-- 3D stage + drum (design.md §4). The lever and rotation logic arrive in Phase 4. -->
+    <div id="viewport-stage">
+      <div id="roulette-drum">
+        <div id="executive-face" class="drum-face">
+          <ExecutiveView />
+        </div>
+        <!-- Hidden face: inert until activated, see setActiveView() -->
+        <div id="gamedev-face" class="drum-face" inert aria-hidden="true">
+          <GameDevView />
+        </div>
       </div>
     </div>
   </main>
+
+  <ToastNotification />
+  <ProjectModal />
+
+  <script>
+    import '../scripts/main';
+  </script>
 </MainLayout>

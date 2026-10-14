@@ -1,0 +1,35 @@
+---
+import CyberHudHeader from './CyberHudHeader.astro';
+import CyberQuestProjects from './CyberQuestProjects.astro';
+import CyberSkillTree from './CyberSkillTree.astro';
+import ContactPanel from '../shared/ContactPanel.astro';
+import { profile } from '../../data/portfolioData';
+import { t } from '../../scripts/i18n';
+
+const year = new Date().getFullYear();
+---
+
+<div id="gamedev-view" class="hud-root">
+  <!-- Decorative layers: kept out of the a11y tree and out of pointer events -->
+  <div class="hud-grid-layer bg-cyber-grid" aria-hidden="true"></div>
+  <div class="hud-scanlines cyber-scanlines" aria-hidden="true"></div>
+
+  <div class="relative z-10">
+    <CyberHudHeader />
+    <CyberQuestProjects />
+    <CyberSkillTree />
+
+    <div class="hud-section">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <ContactPanel variant="gamedev" />
+      </div>
+    </div>
+
+    <footer class="hud-footer">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 sm:px-6">
+        <p>© {year} {profile.fullName}</p>
+        <p data-i18n-key="footer.built">{t('footer.built')}</p>
+      </div>
+    </footer>
+  </div>
+</div>

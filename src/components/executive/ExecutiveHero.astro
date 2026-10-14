@@ -1,0 +1,118 @@
+---
+import { ArrowUpRight, Download, GraduationCap, MapPin } from '@lucide/astro';
+import BrandIcon from '../shared/BrandIcon.astro';
+import { education, profile, skillGroups } from '../../data/portfolioData';
+import { t } from '../../scripts/i18n';
+
+const spoken = skillGroups.find((group) => group.id === 'spoken');
+const current = education[0];
+---
+
+<section id="executive-hero" class="exec-hero" aria-labelledby="hero-name">
+  <div class="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-20 pt-32 sm:px-6 lg:grid-cols-[1.25fr_1fr] lg:pb-28 lg:pt-40">
+    <div>
+      <p class="status-pill">
+        <span class="status-pill__dot" aria-hidden="true"></span>
+        <span data-i18n-key="hero.status">{t('hero.status')}</span>
+      </p>
+
+      <p class="section-eyebrow mt-8">
+        <span data-l10n-en={profile.role.en} data-l10n-es={profile.role.es}>{profile.role.en}</span>
+      </p>
+
+      <h1 id="hero-name" class="hero-name">
+        {profile.fullName}
+      </h1>
+
+      <p class="mt-5 max-w-2xl text-xl font-medium leading-snug text-gray-200 sm:text-2xl" data-i18n-key="hero.headline">
+        {t('hero.headline')}
+      </p>
+      <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-400 sm:text-lg" data-i18n-key="hero.tagline">
+        {t('hero.tagline')}
+      </p>
+
+      <div class="mt-9 flex flex-wrap items-center gap-3">
+        <a id="hero-view-projects" href="#executive-projects" class="btn btn-primary" data-nav-target="projects">
+          <span data-i18n-key="hero.cta.projects">{t('hero.cta.projects')}</span>
+          <ArrowUpRight size={18} />
+        </a>
+        <a id="hero-download-cv" href={profile.cvUrl} class="btn btn-ghost" download>
+          <Download size={18} />
+          <span data-i18n-key="hero.cta.cv">{t('hero.cta.cv')}</span>
+        </a>
+        <a
+          id="hero-github"
+          href={profile.githubUrl}
+          class="btn btn-ghost"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <BrandIcon name="github" size={18} />
+          <span data-i18n-key="hero.cta.github">{t('hero.cta.github')}</span>
+        </a>
+        <a
+          id="hero-linkedin"
+          href={profile.linkedinUrl}
+          class="btn btn-ghost"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <BrandIcon name="linkedin" size={18} />
+          <span data-i18n-key="hero.cta.linkedin">{t('hero.cta.linkedin')}</span>
+        </a>
+      </div>
+    </div>
+
+    <aside class="profile-card" aria-label={profile.fullName}>
+      <div class="profile-card__bar" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span class="profile-card__title" data-i18n-key="hero.card.title">{t('hero.card.title')}</span>
+      </div>
+      <dl class="profile-card__body">
+        <div>
+          <dt data-i18n-key="hero.card.name">{t('hero.card.name')}</dt>
+          <dd>{profile.fullName}</dd>
+        </div>
+        <div>
+          <dt data-i18n-key="hero.card.role">{t('hero.card.role')}</dt>
+          <dd data-l10n-en={profile.role.en} data-l10n-es={profile.role.es}>{profile.role.en}</dd>
+        </div>
+        <div>
+          <dt data-i18n-key="hero.card.location">{t('hero.card.location')}</dt>
+          <dd class="flex items-center gap-1.5"><MapPin size={14} />{profile.location}</dd>
+        </div>
+        {
+          current && (
+            <div>
+              <dt data-i18n-key="hero.card.studying">{t('hero.card.studying')}</dt>
+              <dd class="flex items-center gap-1.5">
+                <GraduationCap size={14} />
+                <span data-l10n-en={current.degree.en} data-l10n-es={current.degree.es}>{current.degree.en}</span>
+                <span>@ {current.institution}</span>
+              </dd>
+            </div>
+          )
+        }
+        {
+          spoken && (
+            <div>
+              <dt data-i18n-key="hero.card.languages">{t('hero.card.languages')}</dt>
+              <dd>
+                {spoken.items.map((item, index) => (
+                  <>
+                    {index > 0 && <span> · </span>}
+                    <span data-l10n-en={item.label.en} data-l10n-es={item.label.es}>{item.label.en}</span>
+                  </>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+        <div>
+          <dt data-i18n-key="hero.card.focus">{t('hero.card.focus')}</dt>
+          <dd data-i18n-key="hero.card.focusValue">{t('hero.card.focusValue')}</dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+</section>

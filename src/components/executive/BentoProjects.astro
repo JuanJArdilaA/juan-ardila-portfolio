@@ -1,0 +1,50 @@
+---
+import SyncBadge from '../shared/SyncBadge.astro';
+import { projectFilters } from '../../data/portfolioData';
+import { renderExecutiveCards } from '../../scripts/projectCards';
+import { t } from '../../scripts/i18n';
+import { getManifestProjects } from '../../services/githubService';
+
+/**
+ * First paint uses the local manifest (SSR). The browser then syncs GitHub and
+ * re-renders this grid with the same builder (see projectsController.ts).
+ */
+const [defaultFilter] = projectFilters;
+const initialCards = defaultFilter ? renderExecutiveCards(getManifestProjects(), defaultFilter) : '';
+---
+
+<section id="executive-projects" class="exec-section scroll-mt-24" aria-labelledby="projects-title">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div class="max-w-2xl">
+        <p class="section-eyebrow" data-i18n-key="section.projects.eyebrow">{t('section.projects.eyebrow')}</p>
+        <h2 id="projects-title" class="section-title" data-i18n-key="section.projects">{t('section.projects')}</h2>
+        <p class="section-sub" data-i18n-key="section.projects.sub">{t('section.projects.sub')}</p>
+      </div>
+      <SyncBadge />
+    </div>
+
+    <div
+      class="mt-8 flex flex-wrap gap-2"
+      role="group"
+      aria-label={t('filter.aria')}
+      data-i18n-aria-label="filter.aria"
+    >
+      {
+        projectFilters.map((filter, index) => (
+          <button
+            type="button"
+            class="filter-pill"
+            id={`filter-${filter.id}`}
+            data-filter-id={filter.id}
+            aria-pressed={index === 0 ? 'true' : 'false'}
+          >
+            <span data-l10n-en={filter.label.en} data-l10n-es={filter.label.es}>{filter.label.en}</span>
+          </button>
+        ))
+      }
+    </div>
+
+    <div id="executive-projects-grid" class="bento-grid" set:html={initialCards} />
+  </div>
+</section>
