@@ -1,6 +1,7 @@
 import { initI18n } from './i18n';
 import { initProjects } from './projectsController';
-import { initDefaultViewToggle, initUi } from './ui';
+import { initUi } from './ui';
+import { initLever } from './lever';
 import { setActiveView } from './viewState';
 
 /** Single client entry point for the portfolio page. */
@@ -9,4 +10,5 @@ setActiveView('executive', false);
 initI18n();
 initUi();
 initProjects();
-initDefaultViewToggle();
+// Phase 4: replace the simple toggle with the full lever state machine.
+initLever();

@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout.astro';
 import Navbar from '../components/shared/Navbar.astro';
 import ToastNotification from '../components/shared/ToastNotification.astro';
 import ProjectModal from '../components/shared/ProjectModal.astro';
+import MechanicalLever from '../components/shared/MechanicalLever.astro';
 import ExecutiveView from '../components/executive/ExecutiveView.astro';
 import GameDevView from '../components/gamedev/GameDevView.astro';
 import { t } from '../scripts/i18n';
@@ -14,19 +15,38 @@ import { t } from '../scripts/i18n';
   <Navbar />
 
   <main id="main-content">
-    <!-- 3D stage + drum (design.md §4). The lever and rotation logic arrive in Phase 4. -->
+    <!--
+      3D Stage (design.md §4):
+        #viewport-stage  — perspective container (global.css: perspective 1600px)
+        #roulette-drum   — transform-style: preserve-3d wrapper (no own transform)
+        .drum-face       — each face: backface-visibility hidden, CSS transitions driven by body[data-view]
+
+      Rotation vectors (global.css §100-177):
+        Executive → GameDev: exec tilts to rotateX(90deg)+translateY(-100%), gamedev comes in from rotateX(-90deg)+translateY(100%) → 0
+        GameDev → Executive: reverse vectors
+    -->
     <div id="viewport-stage">
       <div id="roulette-drum">
+
+        <!-- FACE A: Executive View (default / IDLE_EXECUTIVE state) -->
         <div id="executive-face" class="drum-face">
           <ExecutiveView />
         </div>
-        <!-- Hidden face: inert until activated, see setActiveView() -->
+
+        <!--
+          FACE B: GameDev / Cyberpunk 2077 HUD View
+          Initially inert: keyboard focus & screen-reader invisible until activated by setActiveView()
+        -->
         <div id="gamedev-face" class="drum-face" inert aria-hidden="true">
           <GameDevView />
         </div>
+
       </div>
     </div>
   </main>
+
+  <!-- Mechanical lever — fixed bottom-center, always visible -->
+  <MechanicalLever />
 
   <ToastNotification />
   <ProjectModal />

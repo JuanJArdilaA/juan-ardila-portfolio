@@ -1,0 +1,246 @@
+---
+/**
+ * MechanicalLever.astro
+ * Fixed bottom-center industrial lever with:
+ *   - Dark gear-base chassis with hazard warning stripes (Cyberpunk yellow/black)
+ *   - Vertical slot through which the chromatic metal shaft travels
+ *   - 10px-wide chrome metallic shaft with gradient highlight
+ *   - 48×48px spherical red ball knob (#FF003C) with 3D lighting via radial-gradient
+ *
+ * Interaction model (design.md §5):
+ *   - Click (or swipe down) on the knob/shaft → fires 'lever:pull' custom event
+ *   - The lever TypeScript state machine in scripts/lever.ts handles the 3D drum rotation
+ *   - Keyboard: Enter/Space on the lever element also fires the event (a11y)
+ */
+---
+
+<!-- Fixed bottom-center lever assembly -->
+<div
+  id="mechanical-lever"
+  class="lever-assembly"
+  role="button"
+  tabindex="0"
+  aria-label="Toggle view: Executive ↔ GameDev"
+  aria-pressed="false"
+>
+  <!-- Gear-base chassis with hazard stripes + vertical slot -->
+  <div class="lever-base" aria-hidden="true">
+    <!-- Hazard stripe layer -->
+    <div class="lever-hazard-stripes"></div>
+    <!-- Chrome chassis body on top -->
+    <div class="lever-chassis">
+      <!-- Vertical slot carved through the chassis -->
+      <div class="lever-slot"></div>
+    </div>
+  </div>
+
+  <!-- Shaft + knob wrapper — rotates as a unit -->
+  <div id="lever-shaft-wrapper" class="lever-shaft-wrapper" aria-hidden="true">
+    <!-- Metallic chrome shaft -->
+    <div class="lever-shaft gradient-chrome-shaft"></div>
+    <!-- Spherical red ball knob -->
+    <div class="lever-knob gradient-red-ball">
+      <!-- Specular highlight dot for extra 3D realism -->
+      <div class="lever-knob-highlight"></div>
+    </div>
+  </div>
+
+  <!-- View-state label underneath the lever (switches with data-view) -->
+  <div class="lever-label" aria-live="polite">
+    <span class="lever-label-exec" data-lever-label="executive">Executive View</span>
+    <span class="lever-label-hud"  data-lever-label="gamedev">HUD Mode</span>
+  </div>
+</div>
+
+<style>
+  /* ----------------------------------------------------------------
+     Lever Assembly — fixed bottom-center (z-50)
+     ---------------------------------------------------------------- */
+  .lever-assembly {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    translate: -50% 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    cursor: pointer;
+    user-select: none;
+    /* Outer glow reacts to the active view */
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.3));
+    transition: filter 600ms ease;
+  }
+
+  /* When GameDev is active, swap cyan glow for red */
+  :global(body[data-view="gamedev"]) .lever-assembly {
+    filter: drop-shadow(0 0 12px rgba(255, 0, 60, 0.5));
+  }
+
+  .lever-assembly:focus-visible {
+    outline: 2px solid var(--cp-cyan);
+    outline-offset: 6px;
+    border-radius: 6px;
+  }
+
+  /* ----------------------------------------------------------------
+     Gear-base chassis
+     ---------------------------------------------------------------- */
+  .lever-base {
+    position: relative;
+    width: 72px;
+    height: 28px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #2d3150;
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  /* Hazard-stripe background (yellow + obsidian at -45°) */
+  .lever-hazard-stripes {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      #fcee09,
+      #fcee09 5px,
+      #07080c 5px,
+      #07080c 10px
+    );
+    opacity: 0.85;
+  }
+
+  /* Dark chassis panel on top of the stripes */
+  .lever-chassis {
+    position: absolute;
+    inset: 4px 8px;
+    background-color: #11131c;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Vertical slot — the shaft passes through here */
+  .lever-slot {
+    width: 12px;
+    height: 100%;
+    background: #07080c;
+    border-radius: 2px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.9);
+  }
+
+  /* ----------------------------------------------------------------
+     Shaft + knob wrapper — rotates on interaction
+     ---------------------------------------------------------------- */
+  .lever-shaft-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Pivot at the bottom of the chassis (origin = top of wrapper = chassis center) */
+    transform-origin: top center;
+    transform: rotateZ(0deg);
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    /* The shaft starts from above the chassis; we overlap by using negative margin */
+    margin-top: -10px;
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Tilt when GameDev is active — lever pulled toward viewer (backward = +8deg) */
+  :global(body[data-view="gamedev"]) .lever-shaft-wrapper {
+    transform: rotateZ(8deg);
+  }
+
+  /* GPU acceleration hint */
+  .lever-shaft-wrapper,
+  .lever-shaft,
+  .lever-knob {
+    will-change: transform;
+  }
+
+  /* Chrome metallic shaft — 10 × 52px */
+  .lever-shaft {
+    width: 10px;
+    height: 52px;
+    border-radius: 5px;
+  }
+
+  /* Spherical 48×48 red ball knob */
+  .lever-knob {
+    width: 48px;
+    height: 48px;
+    border-radius: 9999px;
+    position: relative;
+    /* Hover: lift + intensify red glow */
+    transition:
+      transform 200ms ease,
+      box-shadow 200ms ease;
+  }
+
+  .lever-assembly:hover .lever-knob,
+  .lever-assembly:focus-visible .lever-knob {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 35px rgba(255, 0, 60, 0.9),
+      0 10px 20px rgba(0, 0, 0, 0.85),
+      inset -4px -4px 8px rgba(0, 0, 0, 0.7),
+      inset 3px 3px 6px rgba(255, 255, 255, 0.6);
+  }
+
+  /* Specular highlight — small white dot at upper-left for 3D sphere illusion */
+  .lever-knob-highlight {
+    position: absolute;
+    top: 22%;
+    left: 22%;
+    width: 28%;
+    height: 28%;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(255,255,255,0.75) 0%, transparent 80%);
+    pointer-events: none;
+  }
+
+  /* ----------------------------------------------------------------
+     State label below the lever
+     ---------------------------------------------------------------- */
+  .lever-label {
+    margin-top: 6px;
+    font-family: var(--font-jetbrains);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--cp-cyan);
+    opacity: 0.7;
+    height: 14px;
+    overflow: hidden;
+  }
+
+  [data-lever-label="gamedev"] {
+    display: none;
+    color: var(--cp-red);
+  }
+
+  :global(body[data-view="gamedev"]) [data-lever-label="executive"] {
+    display: none;
+  }
+
+  :global(body[data-view="gamedev"]) [data-lever-label="gamedev"] {
+    display: inline;
+  }
+
+  /* ----------------------------------------------------------------
+     Prefers-reduced-motion: skip the shaft tilt animation only
+     ---------------------------------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    .lever-shaft-wrapper {
+      transition: none;
+    }
+    .lever-assembly {
+      transition: none;
+    }
+  }
+</style>
